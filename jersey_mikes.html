@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jersey Mike’s Subs</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Electrolize:wght@400&family=Roboto:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <style>
+    /* === PALETA DE COLORES - JERSEY MIKE'S === */
+    :root {
+      --jm-azul: rgb(14, 63, 122);
+      /* Azul marino profundo */
+      --jm-rojo: #D81E05;
+      /* Rojo vibrante */
+      --jm-azul-claro: #EBF2FA;
+      /* Un azul muy pálido para fondos */
+      --jm-borde: #DDE6F1;
+      /* Un gris azulado para bordes sutiles */
+      --jm-texto: #1D2939;
+      /* Un gris oscuro casi negro para el texto */
+      --jm-texto-secundario: #667085;
+      /* Gris para texto menos importante */
+      --jm-blanco: #FFFFFF;
+      --jm-fondo: #F8FAFC;
+      --azul-cima: #01013c;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      padding: 18px;
+      background: var(--jm-fondo);
+      font-family: 'Roboto', system-ui, sans-serif;
+      color: var(--jm-texto);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sheet {
+      background: var(--jm-blanco);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 32px rgba(10, 35, 66, 0.1);
+      border: 1px solid var(--jm-borde);
+    }
+    
+    /* --- HEADER (Sin cambios, como se solicitó) --- */
+    .header {
+      background: var(--azul-cima);
+      color: #fff;
+      margin: -18px -18px 0 -18px;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+    }
+
+    .title {
+      font-family: 'Electrolize', sans-serif;
+      font-size: 24px;
+      color: #fff;
+      margin: 0 auto;
+      text-align: center;
+      flex: 1
+    }
+
+    .header-logo img {
+      height: 34px;
+      width: auto;
+      margin-left: 10px
+    }
+
+    .badges {
+      text-align: center;
+      margin: 8px 0;
+      padding: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 10px;
+      background: var(--jm-azul-claro);
+      color: var(--jm-azul);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--jm-borde);
+      margin: 0 4px
+    }
+
+    /* --- ESTILOS GENERALES Y DE TARJETAS --- */
+    .cover {
+        /* Contenedor del zoom (principal) */
+        overflow: hidden; 
+        border-radius: 12px;
+        border: 1px solid var(--jm-borde);
+        padding: 0; 
+    }
+    
+    .cover img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid var(--jm-borde);
+    }
+
+    /* Estilos para el BANNER DE PRODUCTO (Zoom al pasar el mouse) */
+    .product-banner-img {
+      width: 100%;
+      height: 200px; /* Altura Fija para banner */
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease-in-out; /* Transición para el zoom */
+    }
+
+    .product-banner-container:hover .product-banner-img {
+        transform: scale(1.05); /* Zoom leve al pasar el mouse */
+    }
+    
+    .product-banner-container {
+      overflow: hidden;
+      border-radius: 16px; 
+      box-shadow: 0 4px 12px rgba(10, 35, 66, 0.05);
+    }
+    /* Fin de estilos del Banner */
+
+    /* Estilos específicos para el YouTube Short */
+    .short-container-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Tres columnas */
+        gap: 12px;
+        max-width: 960px; /* Limita el ancho del contenedor de shorts */
+        margin: 0 auto;
+        padding-top: 10px;
+    }
+
+    .short-preview-wrapper {
+        display: block;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 9/16; /* Típico aspecto de Reel/Short */
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease;
+    }
+    
+    .short-preview-wrapper iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        /* Estilo para el zoom al pasar el mouse */
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    .short-preview-wrapper:hover iframe {
+        transform: scale(1.03);
+    }
+    
+    @media (max-width: 768px) {
+        .short-container-grid {
+            grid-template-columns: 1fr; /* Columna única en móvil */
+        }
+        .sheet {
+            padding: 10px; /* Reducir padding en móvil */
+        }
+    }
+    /* Fin de estilos Short */
+
+    /* NUEVOS ESTILOS: Inspiración Dual (GIF + Imagen) */
+    .inspiration-sheet {
+        /* Eliminar padding y sombra para un look limpio */
+        padding: 0 !important;
+        box-shadow: none;
+        border: none;
+        background: none;
+    }
+
+    .inspiration-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        align-items: center; /* Centra los elementos verticalmente */
+        margin: 0;
+    }
+    @media (min-width: 768px) {
+        .inspiration-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    
+    .media-card {
+        padding: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        /* Limpiamos la tarjeta para que solo contenga la imagen/GIF */
+        box-shadow: 0 4px 12px rgba(10, 35, 66, 0.1);
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    /* Efecto de Zoom al pasar el mouse sobre la tarjeta */
+    .media-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 18px rgba(10, 35, 66, 0.2);
+    }
+    
+    .media-card img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 0; /* Ya tenemos border-radius en el contenedor */
+    }
+
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media(min-width:980px) {
+      .grid-container {
+        grid-template-columns: 1.1fr .9fr
+      }
+    }
+
+    h2 {
+      font-size: 16px;
+      margin: 0 0 16px 0;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--jm-azul);
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--jm-azul-claro);
+    }
+
+    h3 {
+      font-size: 14px;
+      margin: 16px 0 8px;
+      color: var(--jm-azul);
+      font-weight: 700;
+    }
+
+    .icon {
+      font-size: 24px;
+      color: var(--jm-rojo);
+      margin-bottom: 8px;
+    }
+
+    /* --- ESTRUCTURA: Resumen Ejecutivo --- */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .summary-item {
+      background: var(--jm-fondo);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--jm-borde);
+      text-align: center;
+    }
+
+    .summary-item h4 {
+      margin: 0 0 4px 0;
+      color: var(--jm-azul);
+      font-size: 14px;
+    }
+
+    .summary-item p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--jm-texto-secundario);
+    }
+
+    /* --- ESTRUCTURA: Justificación Estratégica --- */
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .strategy-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--jm-azul-claro);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--jm-borde);
+    }
+
+    .strategy-card .icon-bg {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--jm-rojo);
+      color: var(--jm-blanco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .strategy-card p {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* --- ESTRUCTURA: Proceso de Franquicia --- */
+    .process-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .process-step {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px;
+      border: 1px solid var(--jm-borde);
+      border-radius: 12px;
+      background: var(--jm-fondo);
+    }
+
+    .process-step .step-number {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--jm-azul);
+      color: var(--jm-blanco);
+      font-weight: 700;
+      font-family: 'Electrolize', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .process-step .step-icon {
+      color: var(--jm-rojo);
+      font-size: 22px;
+    }
+
+    .process-step .step-text b {
+      color: var(--jm-azul);
+    }
+
+    .process-step .step-text span {
+      font-size: 12px;
+      color: var(--jm-texto-secundario);
+    }
+
+    .non-traditional-note {
+      margin-top: 20px;
+      padding: 16px;
+      background-color: var(--jm-azul-claro);
+      border-left: 4px solid var(--jm-rojo);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .non-traditional-note h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--jm-azul);
+    }
+
+    .non-traditional-note p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--jm-texto-secundario);
+    }
+
+
+    /* --- Otros Estilos --- */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .kpi {
+      border: 1px solid var(--jm-borde);
+      border-left: 4px solid var(--jm-rojo);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--jm-fondo);
+      text-align: center;
+    }
+
+    .kpi .lbl {
+      font-size: 10px;
+      color: var(--jm-texto-secundario);
+      text-transform: uppercase;
+    }
+
+    .kpi .val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--jm-rojo);
+      margin: 4px 0;
+    }
+
+    .mono {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .note {
+      font-size: 11px;
+      color: var(--jm-texto-secundario);
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .note-chart {
+      font-size: 11px;
+      color: var(--jm-texto-secundario);
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    /* --- Botón Flotante y Footer --- */
+    .footer {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--jm-borde);
+      display: flex;
+      justify-content: flex-end;
+      color: var(--jm-texto-secundario);
+      font-size: 11px;
+    }
+
+    .boton-flotante {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 50px;
+      height: 50px;
+      background-color: var(--jm-rojo);
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 24px;
+      line-height: 50px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .boton-flotante:hover {
+      background-color: #A81704;
+      transform: scale(1.1);
+    }
+
+    /* --- Estilos de Tabla --- */
+    .table-wrap {
+      overflow-x: auto;
+      /* Permite el desplazamiento horizontal en pantallas pequeñas */
+      border: 1px solid var(--jm-borde);
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    table thead th {
+      background-color: var(--jm-azul);
+      color: var(--jm-blanco);
+      padding: 12px 16px;
+      font-size: 12px;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-bottom: 3px solid var(--jm-rojo);
+      position: sticky;
+      /* Encabezado fijo al hacer scroll */
+      top: 0;
+      z-index: 1;
+    }
+
+    table tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--jm-borde);
+      color: var(--jm-texto-secundario);
+      vertical-align: middle;
+    }
+
+    table tbody tr:nth-child(even) {
+      background-color: var(--jm-fondo);
+      /* Filas con fondo alterno */
+    }
+
+    table tbody tr td:first-child {
+      color: var(--jm-texto);
+      /* El texto de la primera columna más oscuro */
+      font-weight: 500;
+    }
+
+    table tbody tr:last-child {
+      background-color: var(--jm-azul-claro);
+      font-weight: 700;
+    }
+
+    table tbody tr:last-child td {
+      color: var(--jm-azul);
+      border-bottom: none;
+      /* Sin borde en la última fila */
+    }
+
+    /* Contenedor del video de YouTube */
+    #youtube-player-container {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--jm-borde);
+        position: relative;
+        background-color: #000;
+    }
+
+    #youtube-player-container iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+    #video-cover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.3s ease;
+    }
+
+    #video-cover::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4); /* Sombra ligera */
+    }
+
+    #play-button {
+        font-size: 70px;
+        color: rgba(255, 255, 255, 0.9);
+        z-index: 1;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        transition: transform 0.2s ease;
+    }
+
+    #video-cover:hover #play-button {
+        transform: scale(1.1);
+    }
+    
+    /* Clase para ocultar la cubierta */
+    .hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* --- ✨ ESTILOS PARA LOS GRÁFICOS --- */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 16px;
+    }
+    .chart-container {
+        height: 350px; /* Altura ajustada para dos gráficos */
+    }
+    .charts-grid h3 {
+        text-align: center;
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: var(--jm-texto);
+    }
+    @media (max-width: 768px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        background: #fff;
+      }
+
+      .sheet {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+      }
+
+      .no-imprimir,
+      .boton-flotante {
+        display: none !important;
+      }
+    }
+  </style>
+  
+</head>
+
+<body>
+  <div class="wrap">
+
+    <a href="https://reposiorio-estrategia.netlify.app/pipeline_ma" class="boton-flotante no-imprimir"
+      title="Regresar">&#x2190;</a>
+
+    <div class="sheet">
+      <div class="header">
+        <h1 class="title">Jersey Mike’s Subs</h1>
+        <div class="header-logo">
+          <img src="https://cima.one/wp-content/uploads/2025/06/CIMA-Logo-Blanco.svg" alt="CIMA Logo">
+        </div>
+      </div>
+      <div class="cover">
+        <img src="https://drive.google.com/thumbnail?id=1b5UqeOGfRtakexJki9OwAnMROFJrpAR-&sz=w1600"
+          alt="Portada Jersey Mike’s">
+      </div>
+    </div>
+
+    <div class="grid-container">
+      <div class="sheet">
+        <h2>Resumen Ejecutivo</h2>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <i class="fas fa-store icon"></i>
+            <h4>Origen y Tradición</h4>
+            <p>Nació en 1956 en Point Pleasant, NJ, como una tienda local con un sabor auténtico.</p>
+          </div>
+          <div class="summary-item">
+            <i class="fas fa-lightbulb icon"></i>
+            <h4>Concepto</h4>
+            <p> Cadena Fast Casual / QSR de “subs” preparados al momento con foco en frescura (Mike’s Way), ejecución
+              simple y cultura de comunidad.</p>
+          </div>
+          <div class="summary-item">
+            <i class="fas fa-heart icon"></i>
+            <h4>Filosofía Central</h4>
+            <p>Foco en frescura (Mike's Way), servicio cercano y y la preparación a la vista del cliente.</p>
+          </div>
+          <div class="summary-item">
+            <i class="fas fa-rocket icon"></i>
+            <h4>Escala y Crecimiento</h4>
+            <p>Hoy cuenta con más de 3,000 locales y es una de las franquicias de mayor crecimiento.</p>
+          </div>
+
+        </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="lbl">AUV</div>
+            <div class="val mono">US$ 1.2 M</div>
+            <div class="lbl">Item 19 FDD</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Entrenamiento</div>
+            <div class="val">8–10 sem</div>
+            <div class="lbl">Aula + tienda</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Inversión</div>
+            <div class="val mono">US$ 181k – 1.4M</div>
+            <div class="lbl">FDD 2020</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet">
+        <h2>Justificación Estratégica</h2>
+        <div class="strategy-grid">
+          <div class="strategy-card">
+            <div class="icon-bg"><i class="fas fa-rocket"></i></div>
+            <p><b>Entrada a QSR:</b> Diversificación en quick service.</p>
+          </div>
+          <div class="strategy-card">
+            <div class="icon-bg"><i class="fas fa-map-marker-alt"></i></div>
+            <p><b>Primeros en México:</b> Oportunidad "white space".</p>
+          </div>
+          <div class="strategy-card">
+            <div class="icon-bg"><i class="fas fa-handshake"></i></div>
+            <p><b>Sinergias:</b> Retail y landlords ya conocidos.</p>
+          </div>
+          <div class="strategy-card">
+            <div class="icon-bg"><i class="fas fa-globe"></i></div>
+            <p><b>Franquicia Maestra:</b> Explorar el modelo master.</p>
+          </div>
+          <div class="strategy-card">
+            <div class="icon-bg"><i class="fas fa-tasks"></i></div>
+            <p><b>Pilotos Controlados:</b> Validar antes de escalar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="sheet">
+        <h2>Videos de Referencia (YouTube)</h2>
+        <div id="youtube-player-container">
+            <div id="youtube-player"></div>
+        </div>
+        <div class="note">Uso interno. Contenido propiedad de sus titulares.</div>
+    </div>
+
+    <div class="sheet">
+        <h2>Análisis Comparativo: Crecimiento de Locales (EE. UU.)</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Subway Locations (EE. UU.)</h3>
+                <canvas id="subwayChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Jersey Mike's Locations (EE. UU.)</h3>
+                <canvas id="jerseyMikesChart"></canvas>
+            </div>
+        </div>
+        <div class="note-chart">Datos ilustrativos para mostrar tendencias de mercado.</div>
+    </div>
+
+    <div class="sheet">
+        <h2>Análisis Promedio de Ventas</h2>
+          <div class="chart-container">
+              <h3>Jersey Mike's Avg Revenue</h3>
+              <canvas id="jerseyMikesAvgRevenueChart"></canvas>
+          </div>
+        <div class="note-chart">Datos ilustrativos para mostrar tendencias de mercado.</div>
+    </div>
+  
+        <div class="sheet" style="padding: 0;"> 
+      <div class="product-banner-container">
+        <img src="https://cdn-assets.saveon.com/images/1499693479-banner.jpg"
+          alt="Banner de sándwiches de Jersey Mike's" class="product-banner-img">
+      </div>
+    </div>
+    <div class="sheet">
+      <h2>Proceso de Franquicia</h2>
+      <div class="process-list">
+        <div class="process-step">
+          <div class="step-number">1</div>
+          <div class="step-icon"><i class="fas fa-file-signature"></i></div>
+          <div class="step-text"><b>Aplicación:</b><span> Envío de formulario online.</span></div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">2</div>
+          <div class="step-icon"><i class="fas fa-headset"></i></div>
+          <div class="step-text"><b>Discovery:</b><span> Llamada inicial y revisión de criterios.</span></div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">3</div>
+          <div class="step-icon"><i class="fas fa-search-dollar"></i></div>
+          <div class="step-text"><b>Due Diligence:</b><span> Análisis de FDD y visita a tienda.</span></div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">4</div>
+          <div class="step-icon"><i class="fas fa-gavel"></i></div>
+          <div class="step-text"><b>Comité:</b><span> Aprobación final y firma de acuerdo.</span></div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">5</div>
+          <div class="step-icon"><i class="fas fa-hard-hat"></i></div>
+          <div class="step-text"><b>Build-Out:</b><span> Selección de sitio y construcción.</span></div>
+        </div>
+      </div>
+      <div class="non-traditional-note">
+        <h3>No Tradicional</h3>
+        <p>Aeropuertos, estadios, universidades, hospitales, malls, hoteles, militar.</p>
+      </div>
+    </div>
+
+
+    <div class="sheet inspiration-sheet">
+        <div class="inspiration-grid">
+            
+            <div class="media-card">
+                <img src="https://i0.wp.com/www.25score.com/wp-content/uploads/2024/02/Jersey-Mikes-Slider-1080-x-648.gif?fit=1080%2C648&ssl=1"
+                    alt="GIF de un sándwich Jersey Mike's siendo cortado y preparado">
+            </div>
+
+            <div class="media-card">
+                <img src="https://img.youtube.com/vi/JWYqWqJ9bso/maxresdefault.jpg"
+                    alt="Danny DeVito en un comercial de Jersey Mike’s Subs">
+            </div>
+            
+        </div>
+    </div>
+    <div class="sheet" style="padding: 18px;">
+        <h2>Contenido de Alto Impacto (Shorts)</h2>
+        <div class="short-container-grid">
+            
+            <div class="short-preview-wrapper">
+                <iframe
+                    src="https://www.youtube.com/embed/Z0sg1AVkRHU?autoplay=0&controls=1&modestbranding=1"
+                    title="YouTube Short #1 - Jersey Mike's"
+                    allow="encrypted-media; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <div class="short-preview-wrapper">
+                <iframe
+                    src="https://www.youtube.com/embed/HTq0SJhBWzg?autoplay=0&controls=1&modestbranding=1"
+                    title="YouTube Short #2 - Jersey Mike's"
+                    allow="encrypted-media; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            
+            <div class="short-preview-wrapper">
+                <iframe
+                    src="https://www.youtube.com/embed/1wO3CYh-xg4?autoplay=0&controls=1&modestbranding=1"
+                    title="YouTube Short #3 - Jersey Mike's"
+                    allow="encrypted-media; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+        <div class="note">Videos configurados para iniciar en pausa. Haz clic en el video para iniciarlo y activar el sonido.</div>
+    </div>
+    <div class="sheet" style="margin-top: 16px;">
+      <h2>Inversión inicial — Tabla completa (USD)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo de gasto</th>
+              <th>Método</th>
+              <th>Cuándo</th>
+              <th>A quién</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Initial Franchise Fee</td>
+              <td>Lump Sum</td>
+              <td>Al firmar</td>
+              <td>Company</td>
+              <td class="mono">US$ 18,500</td>
+            </tr>
+            <tr>
+              <td>Real Estate & Construction Fee</td>
+              <td>Lump Sum</td>
+              <td>Al arrendar</td>
+              <td>Company</td>
+              <td class="mono">US$ 5,000</td>
+            </tr>
+            <tr>
+              <td>Renta/Depósitos</td>
+              <td>Mensual</td>
+              <td>Mensual</td>
+              <td>Landlord</td>
+              <td class="mono">US$ 0 – 72,480</td>
+            </tr>
+            <tr>
+              <td>Arquitectura</td>
+              <td>As Incurred</td>
+              <td>Al acordar</td>
+              <td>Proveedores</td>
+              <td class="mono">US$ 1,050 – 33,142</td>
+            </tr>
+            <tr>
+              <td>Mejoras al local</td>
+              <td>As Arranged</td>
+              <td>Al acordar</td>
+              <td>Landlord/Contratistas</td>
+              <td class="mono">US$ 75,172 – 722,422</td>
+            </tr>
+            <tr>
+              <td>Equipo/Mobiliario</td>
+              <td>As Arranged</td>
+              <td>Al acordar</td>
+              <td>Proveedores</td>
+              <td class="mono">US$ 31,627 – 207,546</td>
+            </tr>
+            <tr>
+              <td>Inventario inicial</td>
+              <td>As Arranged</td>
+              <td>Al acordar</td>
+              <td>Proveedores</td>
+              <td class="mono">US$ 1,923 – 35,000</td>
+            </tr>
+            <tr>
+              <td>Seguro</td>
+              <td>As Arranged</td>
+              <td>Al acordar</td>
+              <td>Aseguradora</td>
+              <td class="mono">US$ 1,000 – 24,780</td>
+            </tr>
+            <tr>
+              <td>Capacitación</td>
+              <td>As Incurred</td>
+              <td>Previo apertura</td>
+              <td>Viajes, hoteles</td>
+              <td class="mono">US$ 1,000 – 68,000</td>
+            </tr>
+            <tr>
+              <td>Publicidad apertura</td>
+              <td>Lump Sum</td>
+              <td>Al arrendar</td>
+              <td>Company</td>
+              <td class="mono">US$ 12,500</td>
+            </tr>
+            <tr>
+              <td>Señalización exterior</td>
+              <td>As Arranged</td>
+              <td>Al acordar</td>
+              <td>Proveedores</td>
+              <td class="mono">US$ 1,121 – 40,073</td>
+            </tr>
+            <tr>
+              <td>Branding interior</td>
+              <td>As Incurred</td>
+              <td>Al acordar</td>
+              <td>Proveedores</td>
+              <td class="mono">US$ 1,610 – 11,208</td>
+            </tr>
+            <tr>
+              <td>Uniformes/Oficina/Seguridad</td>
+              <td>As Incurred</td>
+              <td>Al acordar</td>
+              <td>Proveedores</td>
+              <td class="mono">US$ 900 – 65,507</td>
+            </tr>
+            <tr>
+              <td>Sistema POS</td>
+              <td>As Incurred</td>
+              <td>Al acordar</td>
+              <td>Proveedores</td>
+              <td class="mono">US$ 8,250 – 27,509</td>
+            </tr>
+            <tr>
+              <td>POS conexión red</td>
+              <td>As Incurred</td>
+              <td>Previo apertura</td>
+              <td>Company</td>
+              <td class="mono">US$ 4,500</td>
+            </tr>
+            <tr>
+              <td>POS licencia</td>
+              <td>As Incurred</td>
+              <td>Previo apertura</td>
+              <td>Company</td>
+              <td class="mono">US$ 2,000 – 4,000</td>
+            </tr>
+            <tr>
+              <td>Honorarios prof.</td>
+              <td>As Incurred</td>
+              <td>Al acordar</td>
+              <td>Contador/Abogado</td>
+              <td class="mono">US$ 250 – 21,425</td>
+            </tr>
+            <tr>
+              <td>Licencias/Permisos</td>
+              <td>As Incurred</td>
+              <td>Al acordar</td>
+              <td>Municipio/Estado</td>
+              <td class="mono">US$ 500 – 25,000</td>
+            </tr>
+            <tr>
+              <td>Fondos adicionales (3m)</td>
+              <td>As Incurred</td>
+              <td>Al acordar</td>
+              <td>Empleados/Proveedores</td>
+              <td class="mono">US$ 15,000</td>
+            </tr>
+            <tr>
+              <td><b>Total</b></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="mono"><b>US$ 181,903 – 1,413,592</b></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">Tabla referencial de EE. UU. Para MX/master franchise varía.</div>
+    </div>
+
+    <div class="footer">
+      <div>Uso interno y confidencial</div>
+    </div>
+  </div>
+
+  <script>
+    // 2. Este código crea el reproductor y define su comportamiento
+    
+    // Lista de IDs de videos de YouTube
+    const youtubeVideoIDs = [
+      "AFx7GMH8ThI", 
+      "Bj-Q891DvdA",
+      "qnBwVEPBjVw", 
+    ];
+    let currentVideoIndex = 0;
+    let player;
+
+    // 3. Esta función se ejecuta automáticamente cuando la API de YouTube está lista
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('youtube-player', {
+        height: '100%',
+        width: '100%',
+        videoId: youtubeVideoIDs[currentVideoIndex], // Carga el primer video
+        playerVars: {
+          'autoplay': 1,       // Autoiniciar video
+          'controls': 0,       // Ocultar controles
+          'mute': 1,           // Silenciar (necesario para autoplay en muchos navegadores)
+          'loop': 0,           // No usar el loop de YouTube, lo controlamos nosotros
+          'rel': 0,            // No mostrar videos relacionados
+          'showinfo': 0,       // Ocultar título del video
+          'modestbranding': 1  // Logo de YouTube más pequeño
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    // 4. La API llamará a esta función cuando el reproductor esté listo
+    function onPlayerReady(event) {
+      event.target.playVideo();
+    }
+
+    // 5. La API llamará a esta función cuando el estado del video cambie (play, pausa, terminado, etc.)
+    function onPlayerStateChange(event) {
+      // Si el estado es "Terminado" (cuyo valor es 0)
+      if (event.data == YT.PlayerState.ENDED) {
+        playNextVideo();
+      }
+    }
+
+    // Función para cargar y reproducir el siguiente video de la lista
+    function playNextVideo() {
+      currentVideoIndex = (currentVideoIndex + 1) % youtubeVideoIDs.length; // Avanza al siguiente video o vuelve al inicio
+      player.loadVideoById(youtubeVideoIDs[currentVideoIndex]);
+    }
+  </script>
+
+  <script>
+    Chart.register(ChartDataLabels);
+    document.addEventListener("DOMContentLoaded", function () {
+        const labels = ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
+        const labelsAvgRevenue = ['2019', '2020', '2021', '2022', '2023', '2024'];
+        const subwayData = [27500, 27400, 26500, 25000, 24000, 22500, 21750, 21250, 20000, 18500];
+        const jerseyMikesData = [1100, 1250, 1375, 1500, 1625, 1875, 2125, 2400, 2750, 3000];
+        const jerseyMikesAvgRevenueData = [824000, 950000, 1000000, 1200000, 1300000, 1350000];
+
+        // Gráfico 1: Subway (Bar Chart)
+        const ctxSubway = document.getElementById('subwayChart');
+        if(ctxSubway) {
+            new Chart(ctxSubway, {
+                type: 'bar', // Creció de línea a barra
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Subway Locations',
+                        data: subwayData,
+                        backgroundColor: 'rgba(0, 146, 35, 0.8)', // Color para barra (Verde)
+                        borderColor: 'rgba(0, 146, 35, 1)',
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false }, datalabels: {
+                            display: false
+                        }},
+                    scales: { y: { beginAtZero: false, title: { display: true, text: 'Número de Locales' } } }
+                }
+            });
+        }
+
+        // Gráfico 2: Jersey Mike's (Bar Chart)
+        const ctxJerseyMikes = document.getElementById('jerseyMikesChart');
+        if(ctxJerseyMikes) {
+            new Chart(ctxJerseyMikes, {
+                type: 'bar', // Creció de línea a barra
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Jersey Mike's Locations",
+                        data: jerseyMikesData,
+                        backgroundColor: 'var(--jm-azul)', // Color para barra (Azul)
+                        borderColor: 'var(--jm-azul)',
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false }, datalabels: {
+                            display: false
+                        }},
+                    scales: { y: { beginAtZero: false, title: { display: true, text: 'Número de Locales' } } }
+                }
+            });
+        }
+
+        // Gráfico 3: Jersey Mike's Avg Unit Volume (Combo Bar/Line Chart)
+        const ctxJerseyMikesAvgRevenue = document.getElementById('jerseyMikesAvgRevenueChart');
+        if(ctxJerseyMikesAvgRevenue) {
+            new Chart(ctxJerseyMikesAvgRevenue, {
+                data: {
+                    labels: labelsAvgRevenue,
+                    datasets: [
+                        // Dataset 1: Bar Chart (Magnitud)
+                        {
+                            type: 'bar',
+                            label: "Ingreso Promedio (USD)",
+                            data: jerseyMikesAvgRevenueData,
+                            backgroundColor: 'rgba(14, 63, 122, 0.6)',
+                            borderColor: 'var(--jm-azul)',
+                            borderWidth: 1,
+                            order: 2 
+                        },
+                        // Dataset 2: Line Chart (Tendencia)
+                        {
+                            type: 'line',
+                            label: "Tendencia",
+                            data: jerseyMikesAvgRevenueData,
+                            borderColor: 'var(--jm-rojo)',
+                            tension: 0.4,
+                            pointBackgroundColor: 'var(--jm-rojo)',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            fill: false,
+                            order: 1 
+                        }
+                    ]
+                },
+                options: {
+                    // ✅ LÍNEA AGREGADA PARA DAR ESPACIO A LA ETIQUETA
+                    layout: {
+                        padding: {
+                            right: 50 
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false, title: { display: true, text: 'Ingreso Promedio (USD)' },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000000) { return '$' + (value / 1000000).toFixed(1) + 'M'; }
+                                    return '$' + (value / 1000).toFixed(0) + 'K';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }, tooltip: { enabled: false },
+                        datalabels: {
+                            display: function(context) { return context.dataIndex === 0 || context.dataIndex === context.dataset.data.length - 1; },
+                            formatter: function(value) {
+                                if (value >= 1000000) { return '$' + (value / 1000000).toFixed(2) + 'M'; }
+                                return '$' + (value / 1000).toFixed(0) + 'K';
+                            },
+                            color: '#333',
+                            align: 'top',
+                            offset: 8,
+                            font: { weight: 'bold', size: 14 }
+                        }
+                    }
+                }
+            });
+        }
+    });
+  </script>
+
+</body>
+
+</html>
